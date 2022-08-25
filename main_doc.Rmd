@@ -2,6 +2,7 @@
 title: "The Main Document"
 author: "Orhan Aktas"
 date: '2022-08-25'
+
 output:   
     html_document:
       df_print: !expr knitr::kable
@@ -22,15 +23,18 @@ knitr::opts_chunk$set(
 # Required Libraries {.unlisted .unnumbered}
 
 ```{r libraries, message=FALSE, warning=FALSE}
+
 library(XML)
 library(tidyverse)
 library(lubridate)
 library(scales)
 library(ggthemes)
 library(tidyquant) 
+
 ```
 
 # Introduction
+
 
 This document is created for analysing the step count data produced by my IPhone.
 
