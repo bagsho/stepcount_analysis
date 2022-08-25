@@ -1,0 +1,111 @@
+---
+title: "The Main Document"
+author: "Orhan Aktas"
+date: '2022-07-21'
+output:   
+    html_document:
+      df_print: !expr knitr::kable
+      toc: yes
+      number_sections: yes
+      toc_depth: 2
+---
+
+```{r setup, include=FALSE,echo=FALSE}
+knitr::opts_chunk$set(
+  echo = TRUE,
+  message = FALSE,
+  warning = FALSE,
+  class.source = "bg-warning text-warning"
+)
+```
+
+# Required Libraries {.unlisted .unnumbered}
+
+```{r libraries, message=FALSE, warning=FALSE}
+library(tidyverse)
+library(readr)
+```
+
+# Introduction
+
+
+```{r}
+mfa13_export <- read_csv("data/mfa13_export.csv")
+
+data<-mfa13_export %>% 
+  pivot_longer(
+    cols=!1:5,
+    names_to = "year",
+    values_to = "value"
+  ) %>% 
+  mutate(year=as.integer(year)) %>% 
+  set_names(c("Country","Category","Flow_name","Flow_code","Flow_unit","Year","Value")) %>% 
+  select(-Flow_unit)
+
+Flow_codes<-data %>% 
+  group_by(Flow_code,Flow_name) %>% 
+  count() %>% 
+  select(-n)
+
+
+data <- data %>% select(-Flow_code)
+
+rm(mfa13_export)
+
+
+
+
+```
+
+
+
+
+```{r}
+excluded <- c("World","Asia + Pacific","Europe","North America","Latin America + Caribbean","EECCA","Africa","West Asia","USSR")
+data1<-data %>% 
+  filter(!Country %in% excluded) %>% 
+  arrange(Flow_name,Category,Country,Year) %>% 
+  group_by(Flow_name,Category,Country) 
+```
+
+
+```{r}
+data1 %>%
+
+  filter(Year==last(Year)) %>% 
+  select(-Year) %>% 
+  arrange(Flow_name,Category,-Value) %>% 
+  ungroup() %>% 
+  group_by(Flow_name,Category) %>% 
+  mutate(rank = row_number()) %>% 
+  mutate(perc=Value/sum(Value)) %>% 
+ # filter(rank<=10) %>% 
+  filter(Category=="Waste for final treatment and disposal") %>% 
+  filter(Flow_name=="Domestic Material Consumption") %>% 
+  view
+
+
+```
+
+Waste for final treatment and disposal
+
+total
+```{r}
+data1 %>%
+  ungroup() %>% 
+  filter(Year==2019) %>% 
+  filter(Category=="Waste for final treatment and disposal") %>% 
+  filter(Flow_name %in% c("Imports","Exports","Physical Trade Balance")) %>% 
+  pivot_wider(names_from = Flow_name, values_from = Value) %>% 
+  select(-Year) %>% 
+ #  mutate(export=ifelse(Value<=0,Value*-1,0),
+ #         import=ifelse(Value>0,Value,0)
+ #         ) %>% 
+ #  group_by(Flow_name) %>% 
+ #  summarise(sum_export=sum(export),
+ #            sum_import=sum(import)) %>% 
+
+
+  view
+```
+
